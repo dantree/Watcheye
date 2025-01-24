@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  watcheye:
+    build: .
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./src:/app/src
+      - /dev/video0:/dev/video0
+    environment:
+      - DEBUG=true
+    devices:
+      - /dev/video0:/dev/video0
+    restart: unless-stopped 
