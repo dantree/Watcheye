@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
 # 소스 코드 복사
 COPY src/ src/
 
@@ -21,4 +23,4 @@ COPY src/ src/
 EXPOSE 8001
 
 # 실행 명령
-CMD ["python", "-m", "src.main"] 
+CMD ["python", "-m", "main.py"] 

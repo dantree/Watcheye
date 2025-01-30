@@ -2,14 +2,28 @@ version: '3'
 
 services:
   watcheye:
-    build: .
+    build: ./app
     ports:
       - "8001:8001"
+    privileged: true  # 디바이스 접근 권한 부여
+
     volumes:
-      - ./src:/app/src
-      - /dev/video0:/dev/video0
+      - ./app:/app/src
+      # - /dev/video:/dev/video
+      # - /dev/video0:/dev/video0
     environment:
       - DEBUG=true
-    devices:
-      - /dev/video0:/dev/video0
+    # devices:
+    #   - /dev/video:/dev/video #mac
+      # - /dev/video0:/dev/video0
     restart: unless-stopped 
+  proxy:
+    image: nginx:1.18
+    container_name: watcheye_proxy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    volumes:
+      - ./proxy/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - watcheye

@@ -162,6 +162,57 @@ async def view_page():
                     align-items: center;
                 }
 
+                .menu-button {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 8px 16px;
+                    border: none;
+                    border-radius: 4px;
+                    background: #1a73e8;
+                    color: white;
+                    cursor: pointer;
+                    font-size: 14px;
+                    transition: background 0.3s;
+                }
+
+                .menu-button span {
+                    display: inline;  /* 기본적으로 텍스트 표시 */
+                }
+
+                /* 반응형 스타일 */
+                @media (max-width: 1024px) {
+                    .menu-button {
+                        padding: 8px;  /* 패딩 축소 */
+                    }
+                    
+                    .menu-button span {
+                        display: none;  /* 텍스트 숨김 */
+                    }
+                    
+                    .menu-button i {
+                        margin: 0;  /* 아이콘 마진 제거 */
+                    }
+
+                    .logo span {
+                        display: none;  /* 로고 텍스트 숨김 */
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .top-bar {
+                        padding: 12px;
+                    }
+                    
+                    .menu-items, .user-menu {
+                        gap: 8px;  /* 버튼 간격 축소 */
+                    }
+                    
+                    .menu-button {
+                        padding: 6px;  /* 패딩 더 축소 */
+                    }
+                }
+
                 .logo {
                     display: flex;
                     align-items: center;
@@ -185,19 +236,19 @@ async def view_page():
                     gap: 16px;
                 }
 
-                .menu-button {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    padding: 8px 16px;
-                    border: none;
-                    border-radius: 4px;
-                    background: #1a73e8;
-                    color: white;
-                    cursor: pointer;
-                    font-size: 14px;
-                    transition: background 0.3s;
-                }
+                # .menu-button {
+                #     display: flex;
+                #     align-items: center;
+                #     gap: 8px;
+                #     padding: 8px 16px;
+                #     border: none;
+                #     border-radius: 4px;
+                #     background: #1a73e8;
+                #     color: white;
+                #     cursor: pointer;
+                #     font-size: 14px;
+                #     transition: background 0.3s;
+                # }
 
                 .menu-button:hover {
                     background: #1557b0;
@@ -250,9 +301,38 @@ async def view_page():
 
                 .camera-grid {
                     display: grid;
-                    grid-template-columns: repeat(2, 1fr);
+                    grid-template-columns: repeat(2, 1fr);  /* 기본 2열 */
                     gap: 24px;
                     margin-bottom: 24px;
+                }
+
+                /* 반응형 스타일 */
+                @media (max-width: 1024px) {  /* 태블릿 크기에서 1열로 변경 */
+                    .camera-grid {
+                        grid-template-columns: 1fr;  /* 1열로 변경 */
+                    }
+                    
+                    .camera-cell {
+                        max-width: 100%;  /* 너비 제한 해제 */
+                    }
+                }
+
+                @media (max-width: 768px) {  /* 모바일 대응 */
+                    .main-content {
+                        padding: 0 12px 12px;
+                    }
+                    
+                    .camera-grid {
+                        gap: 16px;  /* 간격 줄임 */
+                    }
+                    
+                    .camera-header {
+                        padding: 8px;
+                    }
+                    
+                    .camera-footer {
+                        padding: 8px;
+                    }
                 }
 
                 .camera-cell {
@@ -385,6 +465,42 @@ async def view_page():
                 .camera-cell.active .camera-feed {
                     height: calc(100% - 100px);
                 }
+                /* 로그 스타일 */
+                .log-entry {
+                    padding: 4px 8px;
+                    border-left: 3px solid transparent;
+                    margin-bottom: 4px;
+                }
+
+                .log-entry.info {
+                    border-left-color: #2196F3;
+                }
+
+                .log-entry.warning {
+                    border-left-color: #FFC107;
+                }
+
+                .log-entry.error {
+                    border-left-color: #F44336;
+                }
+
+                .log-time {
+                    color: #888;
+                    margin-right: 8px;
+                }
+
+                .log-container::-webkit-scrollbar {
+                    width: 8px;
+                }
+
+                .log-container::-webkit-scrollbar-track {
+                    background: #2e2e2e;
+                }
+
+                .log-container::-webkit-scrollbar-thumb {
+                    background: #666;
+                    border-radius: 4px;
+                }
             </style>
         </head>
         <body>
@@ -397,29 +513,29 @@ async def view_page():
                 <div class="menu-items">
                     <button onclick="openDashboard()" class="menu-button">
                         <i class="material-icons">dashboard</i>
-                        대시보드
+                        <span>대시보드<span/>
                     </button>
                     <button onclick="openMonitoring()" class="menu-button">
                         <i class="material-icons">monitor</i>
-                        시스템 모니터링
+                        <span>시스템 모니터링<span/>
                     </button>
                     <button onclick="openCameraSettings()" class="menu-button">
                         <i class="material-icons">videocam</i>
-                        카메라 설정
+                        <span>카메라 설정<span/>
                     </button>
                     <button onclick="openSettings()" class="menu-button">
                         <i class="material-icons">settings</i>
-                        설정
+                        <span>설정<span/>
                     </button>
                 </div>
                 <div class="user-menu">
                     <button onclick="openUserManagement()" class="menu-button">
                         <i class="material-icons">people</i>
-                        사용자 관리
+                        <span>사용자 관리<span/>
                     </button>
                     <button onclick="logout()" class="menu-button danger">
                         <i class="material-icons">logout</i>
-                        로그아웃
+                        <span>로그아웃<span/>
                     </button>
                 </div>
             </div>
@@ -609,32 +725,26 @@ async def view_page():
                         </div>
                     </div>
 
-                    <!-- 카메라 3 -->
+                    <!-- 카메라 3 -> 로그 뷰어로 변경 -->
                     <div class="camera-cell" id="camera-3">
                         <div class="camera-header">
-                            <span class="camera-name">카메라 3</span>
+                            <span class="camera-name">시스템 로그</span>
                             <div class="camera-controls">
-                                <button onclick="toggleCamera(3)" class="control-button">
-                                    <i class="material-icons">power_settings_new</i>
+                                <button onclick="clearLogs()" class="control-button">
+                                    <i class="material-icons">clear_all</i>
                                 </button>
-                                <button onclick="toggleAI(3)" class="control-button">
-                                    <i class="material-icons">psychology</i>
+                                <button onclick="toggleAutoScroll()" class="control-button">
+                                    <i class="material-icons">vertical_align_bottom</i>
                                 </button>
                                 <button onclick="toggleFullscreen(3)" class="control-button">
                                     <i class="material-icons">fullscreen</i>
                                 </button>
                             </div>
                         </div>
-                        <div class="camera-feed">
-                            <img src="" alt="Camera 3">
-                            <div class="no-signal">
-                                <i class="material-icons">videocam_off</i>
-                                <span>신호 없음</span>
+                        <div class="log-container" style="height: 100%; overflow-y: auto; background: #1e1e1e; padding: 12px;">
+                            <div id="log-content" style="font-family: monospace; font-size: 12px; color: #fff;">
+                                <!-- 로그 내용이 여기에 추가됨 -->
                             </div>
-                        </div>
-                        <div class="camera-footer">
-                            <div class="status-icon"></div>
-                            <span class="fps" id="fps-3">0 FPS</span>
                         </div>
                     </div>
 
@@ -1065,6 +1175,66 @@ async def view_page():
                     // 모달 이벤트 리스너
                     document.getElementById('monitoring-modal').addEventListener('hidden', stopMonitoring);
                 });
+
+                //로그 기능
+                let autoScroll = true;
+                let logs = [];
+
+                function addLog(message, level = 'info') {
+                    const now = new Date();
+                    const logEntry = {
+                        timestamp: now.toISOString(),
+                        message: message,
+                        level: level
+                    };
+                    
+                    logs.push(logEntry);
+                    updateLogDisplay();
+                }
+
+                function updateLogDisplay() {
+                    const logContent = document.getElementById('log-content');
+                    logContent.innerHTML = logs.map(log => `
+                        <div class="log-entry ${log.level}">
+                            <span class="log-time">[${formatDateTime(log.timestamp)}]</span>
+                            <span class="log-message">${log.message}</span>
+                        </div>
+                    `).join('');
+                    
+                    if (autoScroll) {
+                        logContent.scrollTop = logContent.scrollHeight;
+                    }
+                }
+
+                function clearLogs() {
+                    logs = [];
+                    updateLogDisplay();
+                }
+
+                function toggleAutoScroll() {
+                    autoScroll = !autoScroll;
+                    const scrollButton = document.querySelector('#camera-3 .camera-controls button:nth-child(2)');
+                    scrollButton.classList.toggle('active');
+                }
+
+                // 시스템 로그를 주기적으로 가져오는 함수
+                async function fetchSystemLogs() {
+                    try {
+                        const response = await fetch('/api/v1/system/logs');
+                        const data = await response.json();
+                        
+                        if (data.logs) {
+                            data.logs.forEach(log => {
+                                addLog(log.message, log.level);
+                            });
+                        }
+                    } catch (error) {
+                        console.error('로그 가져오기 실패:', error);
+                    }
+                }
+
+                // 5초마다 로그 업데이트
+                setInterval(fetchSystemLogs, 5000);
 
                 // ESC 키로 전체화면 해제
                 document.addEventListener('keydown', (e) => {

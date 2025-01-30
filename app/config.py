@@ -11,7 +11,11 @@ class Settings(BaseSettings):
     # AI 모델 설정
     MODEL_PATH: str = "models/"
     DETECTION_THRESHOLD: float = 0.5
-    
+    SECRET_KEY: str = "zikeobom"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES=30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
     class Config:
         env_file = ".env"
 
