@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
 # 소스 코드 복사
-COPY src/ src/
+COPY . .
 
 # 포트 설정
 EXPOSE 8001
