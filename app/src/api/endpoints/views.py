@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
-router = APIRouter()
+router = APIRouter(prefix="", tags=["views"])  # prefix를 빈 문자열로 설정
 
 @router.get("/", response_class=HTMLResponse)
 async def view_page():
@@ -937,7 +937,7 @@ async def view_page():
 
                 function logout() {
                     if (confirm('로그아웃 하시겠습니까?')) {
-                        window.location.href = '/view/login';
+                        window.location.href = '/login';
                     }
                 }
 
@@ -1249,11 +1249,347 @@ async def view_page():
     """
     return html_content
 
+
 @router.get("/login", response_class=HTMLResponse)
 async def login_page():
-    # 로그인 페이지 HTML
-    return """
+    html_content = """
     <html>
-        <!-- 로그인 페이지 내용 -->
+        <head>
+            <title>지켜봄 - 로그인</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+            <style>
+                body {
+                    margin: 0;
+                    padding: 0;
+                    font-family: 'Noto Sans KR', sans-serif;
+                    background: #f5f5f5;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                }
+                
+                .login-container {
+                    background: white;
+                    padding: 40px;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    width: 100%;
+                    max-width: 400px;
+                }
+                
+                .logo {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    margin-bottom: 32px;
+                }
+                
+                .logo i {
+                    font-size: 32px;
+                    color: #1a73e8;
+                }
+                
+                .logo span {
+                    font-size: 24px;
+                    font-weight: 500;
+                    color: #1a73e8;
+                }
+                
+                .form-group {
+                    margin-bottom: 20px;
+                }
+                
+                .form-group label {
+                    display: block;
+                    margin-bottom: 8px;
+                    color: #5f6368;
+                }
+                
+                .form-group input {
+                    width: 100%;
+                    padding: 12px;
+                    border: 1px solid #dadce0;
+                    border-radius: 4px;
+                    font-size: 16px;
+                    box-sizing: border-box;
+                }
+                
+                .form-group input:focus {
+                    outline: none;
+                    border-color: #1a73e8;
+                }
+                
+                .submit-btn {
+                    width: 100%;
+                    padding: 12px;
+                    background: #1a73e8;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    margin-bottom: 16px;
+                }
+                
+                .submit-btn:hover {
+                    background: #1557b0;
+                }
+                
+                .register-link {
+                    text-align: center;
+                    color: #5f6368;
+                }
+                
+                .register-link a {
+                    color: #1a73e8;
+                    text-decoration: none;
+                }
+                
+                .register-link a:hover {
+                    text-decoration: underline;
+                }
+
+                .error-message {
+                    color: #d93025;
+                    margin-bottom: 16px;
+                    display: none;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="login-container">
+                <div class="logo">
+                    <i class="material-icons">visibility</i>
+                    <span>지켜봄</span>
+                </div>
+                <div id="error-message" class="error-message"></div>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">사용자명</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">비밀번호</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="submit-btn">로그인</button>
+                </form>
+                <div class="register-link">
+                    계정이 없으신가요? <a href="/register">회원가입</a>
+                </div>
+            </div>
+            
+            <script>
+                document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: document.getElementById('username').value,
+                        password: document.getElementById('password').value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    window.location.href = '/';
+                } else {
+                    const errorMessage = document.getElementById('error-message');
+                    errorMessage.textContent = data.detail || '로그인에 실패했습니다.';
+                    errorMessage.style.display = 'block';
+                }
+                });
+            </script>
+        </body>
     </html>
     """
+    return html_content
+
+
+@router.get("/register", response_class=HTMLResponse)
+async def register_page():
+    html_content = """
+    <html>
+        <head>
+            <title>지켜봄 - 회원가입</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+            <style>
+                body {
+                    margin: 0;
+                    padding: 0;
+                    font-family: 'Noto Sans KR', sans-serif;
+                    background: #f5f5f5;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                }
+                
+                .register-container {
+                    background: white;
+                    padding: 40px;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    width: 100%;
+                    max-width: 400px;
+                }
+                
+                .logo {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    margin-bottom: 32px;
+                }
+                
+                .logo i {
+                    font-size: 32px;
+                    color: #1a73e8;
+                }
+                
+                .logo span {
+                    font-size: 24px;
+                    font-weight: 500;
+                    color: #1a73e8;
+                }
+                
+                .form-group {
+                    margin-bottom: 20px;
+                }
+                
+                .form-group label {
+                    display: block;
+                    margin-bottom: 8px;
+                    color: #5f6368;
+                }
+                
+                .form-group input {
+                    width: 100%;
+                    padding: 12px;
+                    border: 1px solid #dadce0;
+                    border-radius: 4px;
+                    font-size: 16px;
+                    box-sizing: border-box;
+                }
+                
+                .form-group input:focus {
+                    outline: none;
+                    border-color: #1a73e8;
+                }
+                
+                .submit-btn {
+                    width: 100%;
+                    padding: 12px;
+                    background: #1a73e8;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    margin-bottom: 16px;
+                }
+                
+                .submit-btn:hover {
+                    background: #1557b0;
+                }
+                
+                .login-link {
+                    text-align: center;
+                    color: #5f6368;
+                }
+                
+                .login-link a {
+                    color: #1a73e8;
+                    text-decoration: none;
+                }
+                
+                .login-link a:hover {
+                    text-decoration: underline;
+                }
+
+                .error-message {
+                    color: #d93025;
+                    margin-bottom: 16px;
+                    display: none;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="register-container">
+                <div class="logo">
+                    <i class="material-icons">visibility</i>
+                    <span>지켜봄</span>
+                </div>
+                <div id="error-message" class="error-message"></div>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="username">사용자명</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">비밀번호</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password2">비밀번호 확인</label>
+                        <input type="password" id="password2" name="password2" required>
+                    </div>
+                    <button type="submit" class="submit-btn">회원가입</button>
+                </form>
+                <div class="login-link">
+                    이미 계정이 있으신가요? <a href="/login">로그인</a>
+                </div>
+            </div>
+            
+            <script>
+                document.getElementById('registerForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const password = document.getElementById('password').value;
+                    const password2 = document.getElementById('password2').value;
+                    
+                    if (password !== password2) {
+                        const errorMessage = document.getElementById('error-message');
+                        errorMessage.textContent = '비밀번호가 일치하지 않습니다.';
+                        errorMessage.style.display = 'block';
+                        return;
+                    }
+                    
+                    const response = await fetch('/api/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username: document.getElementById('username').value,
+                            password: password
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        alert('회원가입이 완료되었습니다.');
+                        window.location.href = '/login';
+                    } else {
+                        const errorMessage = document.getElementById('error-message');
+                        errorMessage.textContent = data.detail || '회원가입에 실패했습니다.';
+                        errorMessage.style.display = 'block';
+                    }
+                });
+            </script>
+        </body>
+    </html>
+    """
+    return html_content

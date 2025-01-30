@@ -1,22 +1,23 @@
-version: '3'
+version: '3.8'
 
 services:
   watcheye:
-    build: ./app
+    build: 
+      context: ./app
+    container_name: watcheye_app
     ports:
       - "8001:8001"
-    privileged: true  # 디바이스 접근 권한 부여
-
     volumes:
-      - ./app:/app/src
-      # - /dev/video:/dev/video
-      # - /dev/video0:/dev/video0
+      - ./app:/app
+      # - ./data:/data
+      # - /tmp/.X11-unix:/tmp/.X11-unix  # X11 소켓 마운트
+    devices:
+      - "/dev/video0:/dev/video0"
     environment:
-      - DEBUG=true
-    # devices:
-    #   - /dev/video:/dev/video #mac
-      # - /dev/video0:/dev/video0
-    restart: unless-stopped 
+      # - DISPLAY=host.docker.internal:0  # MacOS X11 디스플레이 설정
+      - OPENCV_LOG_LEVEL=DEBUG  # OpenCV 디버그 로그 활성화
+    privileged: true  # 웹캠 접근 권한을 위해 필요
+
   proxy:
     image: nginx:1.18
     container_name: watcheye_proxy

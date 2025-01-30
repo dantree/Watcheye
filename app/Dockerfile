@@ -2,7 +2,7 @@
 FROM python:3.9-slim
 
 # 작업 디렉토리 설정
-WORKDIR /app/src
+WORKDIR /app
 
 # 필요한 패키지 설치
 RUN apt-get update && apt-get install -y \
@@ -18,9 +18,10 @@ RUN pip install torch torchvision torchaudio --index-url https://download.pytorc
 
 # 소스 코드 복사
 COPY . .
-
+# PYTHONPATH 설정
+# ENV PYTHONPATH=/app
 # 포트 설정
 EXPOSE 8001
 
 # 실행 명령
-CMD ["python", "-m", "main.py"] 
+CMD ["python", "-m", "src.main"] 
