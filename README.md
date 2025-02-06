@@ -18,7 +18,7 @@
 1. **프로젝트 클론**
     ```bash
     git clone <repository_url>
-    cd yolo-project
+    cd Watcheye
     ```
 
 2. **도커 컴포즈 실행**

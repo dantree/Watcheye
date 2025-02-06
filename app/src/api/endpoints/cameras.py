@@ -39,6 +39,10 @@ async def stream_camera(camera_id: int):
     if camera_id == 1:
         def generate_webcam():
             cap = cv2.VideoCapture(0)
+            cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            cap.set(cv2.CAP_PROP_FPS, 30)
             if not cap.isOpened():
                 logger.error("카메라 장치를 열 수 없습니다!")
                 return
