@@ -668,17 +668,17 @@ async def view_page():
                 <!-- 카메라 그리드 -->
                 <div class="camera-grid">
                     <!-- 카메라 1 -->
-                    <div class="camera-cell" id="camera-1">
+                    <div class="camera-cell" id="camera-0">
                         <div class="camera-header">
                             <span class="camera-name">카메라 1</span>
                             <div class="camera-controls">
-                                <button onclick="toggleCamera(1)" class="control-button">
+                                <button onclick="toggleCamera(0)" class="control-button">
                                     <i class="material-icons">power_settings_new</i>
                                 </button>
-                                <button onclick="toggleAI(1)" class="control-button">
+                                <button onclick="toggleAI(0)" class="control-button">
                                     <i class="material-icons">psychology</i>
                                 </button>
-                                <button onclick="toggleFullscreen(1)" class="control-button">
+                                <button onclick="toggleFullscreen(0)" class="control-button">
                                     <i class="material-icons">fullscreen</i>
                                 </button>
                             </div>
@@ -692,22 +692,22 @@ async def view_page():
                         </div>
                         <div class="camera-footer">
                             <div class="status-icon"></div>
-                            <span class="fps" id="fps-1">0 FPS</span>
+                            <span class="fps" id="fps-0">0 FPS</span>
                         </div>
                     </div>
 
                     <!-- 카메라 2 -->
-                    <div class="camera-cell" id="camera-2">
+                    <div class="camera-cell" id="camera-1">
                         <div class="camera-header">
                             <span class="camera-name">카메라 2</span>
                             <div class="camera-controls">
-                                <button onclick="toggleCamera(2)" class="control-button">
+                                <button onclick="toggleCamera(1)" class="control-button">
                                     <i class="material-icons">power_settings_new</i>
                                 </button>
-                                <button onclick="toggleAI(2)" class="control-button">
+                                <button onclick="toggleAI(1)" class="control-button">
                                     <i class="material-icons">psychology</i>
                                 </button>
-                                <button onclick="toggleFullscreen(2)" class="control-button">
+                                <button onclick="toggleFullscreen(1)" class="control-button">
                                     <i class="material-icons">fullscreen</i>
                                 </button>
                             </div>
@@ -721,7 +721,7 @@ async def view_page():
                         </div>
                         <div class="camera-footer">
                             <div class="status-icon"></div>
-                            <span class="fps" id="fps-2">0 FPS</span>
+                            <span class="fps" id="fps-1">0 FPS</span>
                         </div>
                     </div>
 
@@ -749,17 +749,17 @@ async def view_page():
                     </div>
 
                     <!-- 카메라 4 -->
-                    <div class="camera-cell" id="camera-4">
+                    <div class="camera-cell" id="camera-3">
                         <div class="camera-header">
                             <span class="camera-name">카메라 4</span>
                             <div class="camera-controls">
-                                <button onclick="toggleCamera(4)" class="control-button">
+                                <button onclick="toggleCamera(3)" class="control-button">
                                     <i class="material-icons">power_settings_new</i>
                                 </button>
-                                <button onclick="toggleAI(4)" class="control-button">
+                                <button onclick="toggleAI(3)" class="control-button">
                                     <i class="material-icons">psychology</i>
                                 </button>
-                                <button onclick="toggleFullscreen(4)" class="control-button">
+                                <button onclick="toggleFullscreen(3)" class="control-button">
                                     <i class="material-icons">fullscreen</i>
                                 </button>
                             </div>
@@ -773,7 +773,7 @@ async def view_page():
                         </div>
                         <div class="camera-footer">
                             <div class="status-icon"></div>
-                            <span class="fps" id="fps-4">0 FPS</span>
+                            <span class="fps" id="fps-3">0 FPS</span>
                         </div>
                     </div>
                 </div>
@@ -1079,10 +1079,8 @@ async def view_page():
                             statusIcon.classList.add('connected');
                             img.style.display = 'block';
                             noSignal.style.display = 'none';
-                            if (cameraId === 1) {
-                                startWebcamStream(cameraId);
-                                initFPSCounter(cameraId);  // FPS 카운터 초기화
-                            }
+                            startWebcamStream(cameraId);
+                            initFPSCounter(cameraId);  // FPS 카운터 초기화
                         } else {
                             // 카메라 꺼짐 상태
                             powerButton.classList.remove('active');
@@ -1097,6 +1095,7 @@ async def view_page():
                         showAlert('카메라 제어 중 오류가 발생했습니다.', 'error');
                     }
                 }
+
 
                 // AI 토글
                 async function toggleAI(cameraId) {
@@ -1160,15 +1159,15 @@ async def view_page():
                         });
                         if (response.ok) {
                             // 웹캠 스트림 시작
-                            startWebcamStream(1);
-                            document.querySelector('#camera-1 .status-icon').classList.add('connected');
+                            //startWebcamStream(0);
+                            document.querySelector('#camera-0 .status-icon').classList.add('connected');
                         }
                     } catch (error) {
                         console.error('웹캠 초기화 실패:', error);
                     }
 
                     // 나머지 카메라 초기화
-                    for (let i = 2; i <= 4; i++) {
+                    for (let i = 1; i <= 3; i++) {
                         initWebcam(i);
                     }
 

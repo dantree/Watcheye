@@ -23,6 +23,8 @@
 
 2. **도커 컴포즈 실행**
     ```bash
+    docker-compose down
+    sudo docker system prune -a --volumes
     docker-compose up --build
     ```
 

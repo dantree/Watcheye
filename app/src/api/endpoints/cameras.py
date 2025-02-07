@@ -9,8 +9,12 @@ router = APIRouter()
 camera_manager = CameraManager()
 
 # 카메라 상태 저장을 위한 변수
-webcam_active = False
-webcam_cap = None
+webcam_states = {
+    0: {"active": False, "cap": None},
+    1: {"active": False, "cap": None},
+    2: {"active": False, "cap": None},
+}
+
 
 @router.post("/cameras/{camera_id}")
 async def add_camera(camera_id: int, url: str):
@@ -36,45 +40,45 @@ async def list_cameras():
 async def stream_camera(camera_id: int):
     """카메라 스트리밍 엔드포인트"""
     # 카메라 1은 웹캠으로 처리
-    if camera_id == 1:
-        def generate_webcam():
-            cap = cv2.VideoCapture(0)
-            cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-            cap.set(cv2.CAP_PROP_FPS, 30)
-            if not cap.isOpened():
-                logger.error("카메라 장치를 열 수 없습니다!")
-                return
-            try:
-                while True:
-                    ret, frame = cap.read()
-                    if not ret:
-                        logger.error("프레임 캡처에 실패했습니다.")
-                        break
+    # if camera_id == 1:
+    #     def generate_webcam():
+    #         cap = cv2.VideoCapture(0)
+    #         # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
+    #         # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+    #         # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    #         # cap.set(cv2.CAP_PROP_FPS, 30)
+    #         # if not cap.isOpened():
+    #         #     logger.error("카메라 장치를 열 수 없습니다!")
+    #         #     return
+    #         try:
+    #             while True:
+    #                 ret, frame = cap.read()
+    #                 if not ret:
+    #                     logger.error("프레임 캡처에 실패했습니다.")
+    #                     break
                     
-                    # AI 모델로 프레임 처리
-                    if camera_manager.detection_service:
-                        try:
-                            frame, num_persons, num_helmets = camera_manager.detection_service.process_frame(frame)
-                        except Exception as e:
-                            logger.error(f"Error processing frame: {str(e)}")
+    #                 # AI 모델로 프레임 처리
+    #                 if camera_manager.detection_service:
+    #                     try:
+    #                         frame, num_persons, num_helmets = camera_manager.detection_service.process_frame(frame)
+    #                     except Exception as e:
+    #                         logger.error(f"Error processing frame: {str(e)}")
                     
-                    # JPEG으로 인코딩
-                    ret_enc, buffer = cv2.imencode('.jpg', frame)
-                    if not ret_enc:
-                        logger.error("프레임 JPEG 인코딩에 실패했습니다.")
-                        continue
-                    frame_bytes = buffer.tobytes()
-                    yield (b'--frame\r\n'
-                        b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-            finally:
-                cap.release()
+    #                 # JPEG으로 인코딩
+    #                 ret_enc, buffer = cv2.imencode('.jpg', frame)
+    #                 if not ret_enc:
+    #                     logger.error("프레임 JPEG 인코딩에 실패했습니다.")
+    #                     continue
+    #                 frame_bytes = buffer.tobytes()
+    #                 yield (b'--frame\r\n'
+    #                     b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+    #         finally:
+    #             cap.release()
         
-        return StreamingResponse(
-            generate_webcam(),
-            media_type='multipart/x-mixed-replace; boundary=frame'
-        )
+    #     return StreamingResponse(
+    #         generate_webcam(),
+    #         media_type='multipart/x-mixed-replace; boundary=frame'
+    #     )
     
     # 다른 카메라들은 기존 로직으로 처리
     camera = camera_manager.get_camera(camera_id)
@@ -132,49 +136,62 @@ async def update_threshold(threshold: float):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
+    
 @router.post("/cameras/{camera_id}/toggle")
 async def toggle_camera(camera_id: int):
     """카메라 ON/OFF 토글"""
-    global webcam_active, webcam_cap
+    if camera_id not in webcam_states:
+        raise HTTPException(status_code=404, detail="Invalid camera ID")
     
-    if camera_id == 1:  # 웹캠
-        if webcam_active:
-            if webcam_cap:
-                webcam_cap.release()
-                webcam_cap = None
-            webcam_active = False
+    try:
+        camera_state = webcam_states[camera_id]
+        
+        if camera_state["active"]:
+            # 카메라가 켜져 있으면 끄기
+            if camera_state["cap"]:
+                camera_state["cap"].release()
+                camera_state["cap"] = None
+            camera_state["active"] = False
+            logger.info(f"Camera {camera_id} turned off")
             return {"status": "off"}
         else:
-            webcam_active = True
+            # 카메라가 꺼져 있으면 켜기
+            camera_state["active"] = True
+            logger.info(f"Camera {camera_id} turned on")
             return {"status": "on"}
-    else:
-        camera = camera_manager.get_camera(camera_id)
-        if not camera:
-            raise HTTPException(status_code=404, detail="Camera not found")
-        
-        camera.toggle_active()
-        return {"status": "on" if camera.is_active else "off"}
-
+            
+    except Exception as e:
+        logger.error(f"Camera {camera_id} toggle error: {str(e)}")
+        if camera_state["cap"]:
+            camera_state["cap"].release()
+            camera_state["cap"] = None
+        camera_state["active"] = False
+        raise HTTPException(
+            status_code=500, 
+            detail=f"카메라 제어 중 오류 발생: {str(e)}"
+        )
+     
 @router.post("/cameras/{camera_id}/ai")
 async def toggle_ai(camera_id: int, enabled: bool):
     """카메라의 AI 감지 기능을 켜거나 끕니다."""
     try:
-        if camera_id == 1:  # 웹캠
-            if enabled:
-                camera_manager.detection_service.enable_detection()
-            else:
-                camera_manager.detection_service.disable_detection()
-        else:
-            camera = camera_manager.get_camera(camera_id)
-            if not camera:
-                raise HTTPException(status_code=404, detail="Camera not found")
-            
-            if enabled:
-                camera.enable_detection()
-            else:
-                camera.disable_detection()
+        # if camera_id == 0:  # 웹캠
+        #     if enabled:
+        #         camera_manager.detection_service.enable_detection()
+        #     else:
+        #         camera_manager.detection_service.disable_detection()
+        # else:
+        camera = camera_manager.get_camera(camera_id)
+        if not camera:
+            raise HTTPException(status_code=404, detail="Camera not found")
         
-        return {"success": True, "ai_enabled": enabled}
+        if enabled:
+            camera.enable_detection()
+        else:
+            camera.disable_detection()
+    
+        return {"success": True, "ai_enabled": enabled} 
     except Exception as e:
         logger.error(f"AI 토글 중 오류 발생: {e}")
         raise HTTPException(status_code=500, detail=str(e)) 

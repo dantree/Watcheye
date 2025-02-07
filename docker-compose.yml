@@ -6,6 +6,7 @@ services:
     container_name: watcheye_app
     ports:
       - "8001:8001"
+    privileged: true
     volumes:
       - ./app:/app
       - /tmp/.X11-unix:/tmp/.X11-unix:ro
@@ -16,11 +17,7 @@ services:
       - QT_X11_NO_MITSHM=1
       - DISPLAY=${DISPLAY}
       - OPENCV_LOG_LEVEL=DEBUG
-      - OPENCV_VIDEOIO_PRIORITY_V4L2=1  # V4L2 백엔드 우선 사용 
-    privileged: true  # 웹캠 접근 권한을 위해 필요
-    # shm_size: 4g
-    # networks:
-    #   - watcheye_network
+
   proxy:
     image: nginx:1.18
     container_name: watcheye_proxy
@@ -31,8 +28,3 @@ services:
       - ./proxy/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - watcheye
-#     networks:
-#       - watcheye_network
-# networks:
-#   watcheye_network:
-#     driver: bridge

@@ -29,11 +29,7 @@ app.include_router(
     prefix="/api",
     tags=["auth"]
 )
-app.include_router(
-    register.router,
-    prefix="/api",
-    tags=["auth"]
-)
+
 app.include_router(
     cameras.router,
     prefix="/api/v1",
