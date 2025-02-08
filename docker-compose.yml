@@ -16,7 +16,7 @@ services:
     environment:
       - QT_X11_NO_MITSHM=1
       - DISPLAY=${DISPLAY}
-      - OPENCV_LOG_LEVEL=DEBUG
+      # - OPENCV_LOG_LEVEL=DEBUG
 
   proxy:
     image: nginx:1.18

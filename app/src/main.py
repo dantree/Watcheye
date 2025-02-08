@@ -64,4 +64,4 @@ if __name__ == "__main__":
     import uvicorn
     logger.info("Starting 지켜봄 서비스...")
     # host를 '0.0.0.0'으로 설정하여 외부 접속 허용
-    uvicorn.run(app, host="0.0.0.0", port=8001) 
+    uvicorn.run(app, host="0.0.0.0", port=8001, access_log=False) 
