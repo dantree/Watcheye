@@ -1125,45 +1125,76 @@ async def view_page(request: Request, db: Session = Depends(get_db)):
                         }
                     }
 
-
-                    // AI 토글
                     async function toggleAI(cameraId) {
                         try {
-                            const cameraCell = document.getElementById(`camera-${cameraId}`);
-                            const aiButton = cameraCell.querySelector('.control-button[onclick^="toggleAI"]');
-                            const aiIcon = aiButton.querySelector('i');
+                            console.log(`Camera ${cameraId}의 AI 토글 시도`);
 
-                            const enabled = !aiButton.classList.contains('active');
+                            // 카메라 셀 요소를 가져옵니다.
+                            const cameraCell = document.getElementById(`camera-${cameraId}`);
+                            if (!cameraCell) {
+                                throw new Error(`ID가 "camera-${cameraId}"인 카메라 셀을 찾을 수 없습니다.`);
+                            }
+                            
+                            // 카메라 셀 내에서 AI 토글 버튼과 아이콘 요소를 찾습니다.
+                            const aiButton = cameraCell.querySelector('.control-button[onclick^="toggleAI"]');
+                            if (!aiButton) {
+                                throw new Error(`카메라 셀 "camera-${cameraId}" 내에 AI 토글 버튼을 찾을 수 없습니다.`);
+                            }
+                            const aiIcon = aiButton.querySelector('i');
+                            if (!aiIcon) {
+                                throw new Error(`카메라 셀 "camera-${cameraId}"의 AI 토글 버튼 내에서 아이콘 요소를 찾을 수 없습니다.`);
+                            }
+                            
+                            // 현재 버튼에 active 클래스가 있는지 확인하여, 새 상태 결정
+                            const desiredEnabled = !aiButton.classList.contains('active');
+                            console.log(`AI 감지를 ${desiredEnabled ? "활성화" : "비활성화"} 하도록 설정합니다.`);
+                            
+                            // 백엔드의 /api/v1/cameras/{cameraId}/ai 엔드포인트에 POST 요청 (JSON 본문: { enabled: true/false })
                             const response = await fetch(`/api/v1/cameras/${cameraId}/ai`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify({ enabled: enabled })
+                                body: JSON.stringify({ enabled: desiredEnabled })
                             });
 
                             if (response.ok) {
                                 const data = await response.json();
+                                console.log("서버 응답:", data);
                                 if (data.success) {
-                                    if (enabled) {
+                                    // data.ai_enabled는 CameraManager에서 관리하는 AI 상태입니다.
+                                    if (data.ai_enabled) {
                                         aiButton.classList.add('active');
-                                        aiIcon.style.color = '#1a73e8';  // 파란색
+                                        aiIcon.style.color = '#1a73e8';  // 활성화 시 파란색
                                         showAlert('AI 감지가 활성화되었습니다.', 'success');
+                                        // 스트림 이미지 URL 업데이트: AI 적용된 스트림 요청 (예: ?ai=true)
+                                        const streamImg = cameraCell.querySelector('img');
+                                        if (streamImg) {
+                                            streamImg.src = `/api/v1/cameras/${cameraId}/stream?ai=true&t=${Date.now()}`;
+                                        }
                                     } else {
                                         aiButton.classList.remove('active');
-                                        aiIcon.style.color = '#5f6368';  // 회색
+                                        aiIcon.style.color = '#5f6368';  // 비활성화 시 회색
                                         showAlert('AI 감지가 비활성화되었습니다.', 'info');
+                                        // 기본 스트림 URL로 업데이트
+                                        const streamImg = cameraCell.querySelector('img');
+                                        if (streamImg) {
+                                            streamImg.src = `/api/v1/cameras/${cameraId}/stream?t=${Date.now()}`;
+                                        }
                                     }
+                                } else {
+                                    throw new Error('서버가 성공을 반환하지 않았습니다.');
                                 }
                             } else {
-                                throw new Error('AI 제어 실패');
+                                throw new Error(`AI 제어 실패 (상태 코드: ${response.status})`);
                             }
                         } catch (error) {
-                            console.error('Error:', error);
+                            console.error("toggleAI 함수에서 에러 발생:", error);
                             showAlert('AI 제어 중 오류가 발생했습니다.', 'error');
                         }
                     }
 
+                    
                     // 알림 표시 함수
                     function showAlert(message, type = 'info') {
                         const alertBanner = document.getElementById('alert-banner');

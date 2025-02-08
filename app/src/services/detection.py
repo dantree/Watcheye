@@ -18,7 +18,16 @@ class DetectionService:
         except Exception as e:
             logger.error(f"Error loading person detection model: {e}")
             raise
-        
+    def enable_detection(self):
+        """AI 감지 기능을 활성화합니다."""
+        self.active = True
+        logger.info("Detection enabled.")
+
+    def disable_detection(self):
+        """AI 감지 기능을 비활성화합니다."""
+        self.active = False
+        logger.info("Detection disabled.")
+
     def detect_person(self, image):
         """사람 감지 함수"""
         results = self.person_model(image)
