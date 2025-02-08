@@ -3,7 +3,6 @@ from loguru import logger
 from .api.endpoints import events, cameras, views, system, login, register
 from .models.database import engine, Base
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordBearer
 
 app = FastAPI(title="지켜봄 서비스")
 
@@ -18,14 +17,18 @@ app.add_middleware(
 
 # 데이터베이스 테이블 생성
 Base.metadata.create_all(bind=engine)
-# OAuth2 설정
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
 
 # 라우터 등록
-app.include_router(views.router)  # todo: 로그인 안하면 view페이지 못들어가게 수정, 로그아웃 기능 추가
+app.include_router(views.router) 
 
 app.include_router(
     login.router,
+    prefix="/api",
+    tags=["auth"]
+)
+
+app.include_router(
+    register.router,
     prefix="/api",
     tags=["auth"]
 )

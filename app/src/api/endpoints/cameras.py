@@ -39,48 +39,6 @@ async def list_cameras():
 @router.get("/cameras/{camera_id}/stream")
 async def stream_camera(camera_id: int):
     """카메라 스트리밍 엔드포인트"""
-    # 카메라 1은 웹캠으로 처리
-    # if camera_id == 1:
-    #     def generate_webcam():
-    #         cap = cv2.VideoCapture(0)
-    #         # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
-    #         # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    #         # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-    #         # cap.set(cv2.CAP_PROP_FPS, 30)
-    #         # if not cap.isOpened():
-    #         #     logger.error("카메라 장치를 열 수 없습니다!")
-    #         #     return
-    #         try:
-    #             while True:
-    #                 ret, frame = cap.read()
-    #                 if not ret:
-    #                     logger.error("프레임 캡처에 실패했습니다.")
-    #                     break
-                    
-    #                 # AI 모델로 프레임 처리
-    #                 if camera_manager.detection_service:
-    #                     try:
-    #                         frame, num_persons, num_helmets = camera_manager.detection_service.process_frame(frame)
-    #                     except Exception as e:
-    #                         logger.error(f"Error processing frame: {str(e)}")
-                    
-    #                 # JPEG으로 인코딩
-    #                 ret_enc, buffer = cv2.imencode('.jpg', frame)
-    #                 if not ret_enc:
-    #                     logger.error("프레임 JPEG 인코딩에 실패했습니다.")
-    #                     continue
-    #                 frame_bytes = buffer.tobytes()
-    #                 yield (b'--frame\r\n'
-    #                     b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-    #         finally:
-    #             cap.release()
-        
-    #     return StreamingResponse(
-    #         generate_webcam(),
-    #         media_type='multipart/x-mixed-replace; boundary=frame'
-    #     )
-    
-    # 다른 카메라들은 기존 로직으로 처리
     camera = camera_manager.get_camera(camera_id)
     if not camera:
         raise HTTPException(status_code=404, detail="Camera not found")
