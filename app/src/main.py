@@ -3,6 +3,7 @@ from loguru import logger
 from .api.endpoints import events, cameras, views, system, login, register
 from .models.database import engine, Base
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 app = FastAPI(title="지켜봄 서비스")
 
@@ -63,5 +64,9 @@ async def health_check():
 if __name__ == "__main__":
     import uvicorn
     logger.info("Starting 지켜봄 서비스...")
+    # 로그 저장 폴더 생성 (존재하지 않으면 생성)
+    os.makedirs("logs", exist_ok=True)
+    # Loguru 설정: logs/system.log 파일에 로그를 기록하며, 500MB마다 롤링 처리
+    logger.add("logs/system.log", rotation="500 MB")
     # host를 '0.0.0.0'으로 설정하여 외부 접속 허용
     uvicorn.run(app, host="0.0.0.0", port=8001, access_log=False) 

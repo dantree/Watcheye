@@ -4,6 +4,7 @@ import GPUtil
 from datetime import datetime
 from typing import List, Dict, Any
 import logging
+import os
 
 router = APIRouter()
 
@@ -127,3 +128,21 @@ async def add_log(level: str, message: str):
     except Exception as e:
         logger.error(f"로그 추가 실패: {e}")
         return {"success": False, "error": str(e)} 
+    
+@router.get("/system/logs")
+async def get_system_logs():
+    """
+    최근 시스템 로그(예: 마지막 50줄)를 반환합니다.
+    (이 예시는 로그가 'logs/system.log' 파일에 기록된다고 가정합니다.)
+    """
+    log_file = "logs/system.log"
+    if not os.path.exists(log_file):
+        return {"logs": []}
+    with open(log_file, "r") as f:
+        lines = f.readlines()[-100:]  # 최근 50줄만 읽음
+    # 각 로그 항목을 JSON 객체로 변환 (원하는 형식으로 수정 가능)
+    logs = []
+    for line in lines:
+        # 여기서는 단순히 문자열만 반환합니다.
+        logs.append({"timestamp": "", "level": "", "message": line.strip()})
+    return {"logs": logs}

@@ -124,46 +124,6 @@ async def view_page(request: Request, db: Session = Depends(get_db)):
                         background: #ea4335;
                     }
 
-                    /* 시스템 로그 스타일 */
-                    .system-logs {
-                        background: white;
-                        padding: 20px;
-                        border-radius: 12px;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                        margin-top: 24px;
-                    }
-
-                    .log-viewer {
-                        height: 200px;
-                        overflow-y: auto;
-                        background: #f8f9fa;
-                        padding: 12px;
-                        border-radius: 4px;
-                        font-family: monospace;
-                        font-size: 14px;
-                    }
-
-                    .log-item {
-                        margin-bottom: 4px;
-                        padding: 4px 8px;
-                        border-radius: 4px;
-                    }
-
-                    .log-item.info {
-                        background: #e8f0fe;
-                        color: #1a73e8;
-                    }
-
-                    .log-item.warning {
-                        background: #fef7e0;
-                        color: #f9ab00;
-                    }
-
-                    .log-item.error {
-                        background: #fce8e6;
-                        color: #d93025;
-                    }
-
                     .top-bar {
                         background: white;
                         padding: 12px 24px;
@@ -247,20 +207,6 @@ async def view_page(request: Request, db: Session = Depends(get_db)):
                         display: flex;
                         gap: 16px;
                     }
-
-                    # .menu-button {
-                    #     display: flex;
-                    #     align-items: center;
-                    #     gap: 8px;
-                    #     padding: 8px 16px;
-                    #     border: none;
-                    #     border-radius: 4px;
-                    #     background: #1a73e8;
-                    #     color: white;
-                    #     cursor: pointer;
-                    #     font-size: 14px;
-                    #     transition: background 0.3s;
-                    # }
 
                     .menu-button:hover {
                         background: #1557b0;
@@ -476,43 +422,95 @@ async def view_page(request: Request, db: Session = Depends(get_db)):
 
                     .camera-cell.active .camera-feed {
                         height: calc(100% - 100px);
+                                                width: 100%;
+
                     }
-                    /* 로그 스타일 */
-                    .log-entry {
-                        padding: 4px 8px;
-                        border-left: 3px solid transparent;
-                        margin-bottom: 4px;
+                    /* 시스템 로그 전체 영역 */
+                    .system-logs {
+                    background: white;
+                    border-radius: 12px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                     }
 
-                    .log-entry.info {
-                        border-left-color: #2196F3;
+                    /* 로그 뷰어 */
+                    .log-viewer {
+                    height: 100%;               /* 두 번째 블록의 높이 값 사용 */
+                    width:100%;
+                    overflow-y: auto;
+                    background: #1e1e1e;         /* 첫 번째 블록의 어두운 배경색 사용 */
+                    padding: 12px;
+                    border-radius: 4px;
+                    font-family: monospace;
+                    font-size: 12px;             /* 첫 번째 블록의 폰트 크기 사용 */
+                    color: #fff;                 /* 텍스트 색상 흰색 */
                     }
 
-                    .log-entry.warning {
-                        border-left-color: #FFC107;
+                    /* 웹킷 브라우저용 스크롤바 커스터마이징 */
+                    .log-viewer::-webkit-scrollbar {
+                    width: 8px;
+                    }
+                    .log-viewer::-webkit-scrollbar-track {
+                    background: #ddd;
+                    border-radius: 4px;
+                    }
+                    .log-viewer::-webkit-scrollbar-thumb {
+                    background: #888;
+                    border-radius: 4px;
+                    }
+                    .log-viewer::-webkit-scrollbar-thumb:hover {
+                    background: #555;
                     }
 
-                    .log-entry.error {
-                        border-left-color: #F44336;
+                    /* 로그 내용 영역 내부의 개별 로그 항목 (log-content 내부에 있을 경우) */
+                    .log-content .log-entry {
+                    padding: 4px 8px;
+                    border-left: 3px solid transparent;
+                    margin-bottom: 4px;
                     }
 
-                    .log-time {
-                        color: #888;
-                        margin-right: 8px;
+                    /* 로그 레벨에 따른 스타일 (log-content 내부) */
+                    .log-content .log-entry.info {
+                    border-left-color: #2196F3;
+                    }
+                    .log-content .log-entry.warning {
+                    border-left-color: #FFC107;
+                    }
+                    .log-content .log-entry.error {
+                    border-left-color: #F44336;
                     }
 
-                    .log-container::-webkit-scrollbar {
-                        width: 8px;
+                    /* 로그 항목 내 시간 표시 (log-content 내부) */
+                    .log-content .log-time {
+                    color: #888;
+                    margin-right: 8px;
                     }
 
-                    .log-container::-webkit-scrollbar-track {
-                        background: #2e2e2e;
+                    /* 또는, 로그 항목에 직접 적용할 경우 */
+                    .log-item {
+                    margin-bottom: 4px;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    display: flex;
+                    flex-direction: row;
+                    gap: 8px;
+                    }
+                    .log-item .log-time {
+                    color: #888;
+                    min-width: 120px;
+                    }
+                    .log-item.info {
+                    background: #e8f0fe;
+                    color: #1a73e8;
+                    }
+                    .log-item.warning {
+                    background: #fef7e0;
+                    color: #f9ab00;
+                    }
+                    .log-item.error {
+                    background: #fce8e6;
+                    color: #d93025;
                     }
 
-                    .log-container::-webkit-scrollbar-thumb {
-                        background: #666;
-                        border-radius: 4px;
-                    }
                 </style>
             </head>
             <body>
@@ -647,14 +645,6 @@ async def view_page(request: Request, db: Session = Depends(get_db)):
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- 시스템 로그 -->
-                            <div class="system-logs">
-                                <h3>시스템 로그</h3>
-                                <div class="log-viewer" id="system-log-viewer">
-                                    <!-- 로그 항목들이 여기에 동적으로 추가됨 -->
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -753,15 +743,17 @@ async def view_page(request: Request, db: Session = Depends(get_db)):
                                     </button>
                                 </div>
                             </div>
-                            <div class="log-container" style="height: 100%; overflow-y: auto; background: #1e1e1e; padding: 12px;">
-                                <div id="log-content" style="font-family: monospace; font-size: 12px; color: #fff;">
-                                    <!-- 로그 내용이 여기에 추가됨 -->
+                            <div class="camera-feed system-logs">
+                                <div class="log-viewer" >
+                                    <div class="log-content">
+                                        <!-- 로그 내용이 여기에 추가됨 -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 카메라 4 -->
-                        <div class="camera-cell" id="camera-3">
+                        <div class="camera-cell" id="camera-4">
                             <div class="camera-header">
                                 <span class="camera-name">카메라 4</span>
                                 <div class="camera-controls">
@@ -788,7 +780,6 @@ async def view_page(request: Request, db: Session = Depends(get_db)):
                                 <span class="fps" id="fps-3">0 FPS</span>
                             </div>
                         </div>
-                    </div>
 
                     <!-- 알림 배너 -->
                     <div class="alert-banner" id="alert-banner"></div>
@@ -1073,7 +1064,7 @@ async def view_page(request: Request, db: Session = Depends(get_db)):
                     // 전체화면 토글
                     function toggleFullscreen(cameraId) {
                         const cameraCell = document.getElementById(`camera-${cameraId}`);
-                        
+
                         if (activeCameraCell === cameraCell) {
                             cameraCell.classList.remove('active');
                             activeCameraCell = null;
@@ -1239,6 +1230,7 @@ async def view_page(request: Request, db: Session = Depends(get_db)):
                     let autoScroll = true;
                     let logs = [];
 
+                        // 로그 추가 함수: 전달받은 메시지와 레벨로 로그 항목을 생성하여 전역 배열에 추가하고 화면 업데이트
                     function addLog(message, level = 'info') {
                         const now = new Date();
                         const logEntry = {
@@ -1246,23 +1238,41 @@ async def view_page(request: Request, db: Session = Depends(get_db)):
                             message: message,
                             level: level
                         };
-                        
                         logs.push(logEntry);
                         updateLogDisplay();
                     }
 
+                        // 로그 디스플레이 업데이트 함수:
                     function updateLogDisplay() {
-                        const logContent = document.getElementById('log-content');
-                        logContent.innerHTML = logs.map(log => `
+                        // 모든 log-content 클래스를 가진 요소 선택
+                        const logViewers = document.querySelectorAll('.log-content');
+                        if (!logViewers.length) {
+                            console.error("log-content 요소를 찾을 수 없습니다!");
+                            return;
+                        }
+                        
+                        const content = logs.map(log => `
                             <div class="log-entry ${log.level}">
                                 <span class="log-time">[${formatDateTime(log.timestamp)}]</span>
                                 <span class="log-message">${log.message}</span>
                             </div>
                         `).join('');
                         
-                        if (autoScroll) {
-                            logContent.scrollTop = logContent.scrollHeight;
-                        }
+                        logViewers.forEach(viewer => {
+                            viewer.innerHTML = content;
+                            // 만약 autoScroll이 true이면 각 요소의 스크롤을 맨 아래로 이동
+                            if (autoScroll) {
+                                viewer.scrollTop = viewer.scrollHeight;
+                            }
+                        });
+                    }
+
+
+
+                    // 날짜/시간 포맷 함수: ISO 날짜 문자열을 한국 형식으로 변환
+                    function formatDateTime(isoString) {
+                        const date = new Date(isoString);
+                        return date.toLocaleString('ko-KR');
                     }
 
                     function clearLogs() {
@@ -1276,23 +1286,27 @@ async def view_page(request: Request, db: Session = Depends(get_db)):
                         scrollButton.classList.toggle('active');
                     }
 
-                    // 시스템 로그를 주기적으로 가져오는 함수
                     async function fetchSystemLogs() {
                         try {
+                            console.log("Fetching system logs...");
                             const response = await fetch('/api/v1/system/logs');
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
                             const data = await response.json();
-                            
-                            if (data.logs) {
-                                data.logs.forEach(log => {
-                                    addLog(log.message, log.level);
-                                });
+                            console.log("Received logs:", data);
+                            if (data.logs && Array.isArray(data.logs)) {
+                                logs = data.logs;  // 전체 로그를 대체 (또는 추가할 수도 있음)
+                                updateLogDisplay();
+                            } else {
+                                console.warn("No logs found in response.");
                             }
                         } catch (error) {
                             console.error('로그 가져오기 실패:', error);
                         }
                     }
 
-                    // 5초마다 로그 업데이트
+                    // 5초마다 시스템 로그를 가져와 업데이트
                     setInterval(fetchSystemLogs, 5000);
 
                     // ESC 키로 전체화면 해제
