@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 class EventBase(BaseModel):
     camera_id: int
@@ -18,10 +18,20 @@ class Event(EventBase):
         orm_mode = True 
 
 class UserBase(BaseModel):
-    username: str
+    email: str
+    phone: str
+    name: str
 
 class UserCreate(UserBase):
     password: str
+
+class User(UserBase):
+    id: int
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 
 class UserLogin(BaseModel):
     username: str
@@ -44,8 +54,24 @@ class RegisterResponse(BaseModel):
     username: str
 
 class TokenData(BaseModel):
-    username: Optional[str] = None
+    email: Optional[str] = None
 
 class Token(BaseModel):
     access_token: str
-    token_type: str = "bearer"
+    token_type: str
+
+class SystemSettingBase(BaseModel):
+    key: str
+    value: str
+    description: Optional[str] = None
+
+class SystemSettingCreate(SystemSettingBase):
+    pass
+
+class SystemSetting(SystemSettingBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True

@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, Text
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from sqlalchemy.sql import func
 from .database import Base
@@ -12,6 +13,14 @@ class Event(Base):
     event_type = Column(String)
     description = Column(String, nullable=True)
     timestamp = Column(DateTime, default=datetime.utcnow) 
+    type = Column(String, index=True)  # safety_log, safety_capture 등
+    level = Column(String, nullable=True)  # info, warning, error 등
+    message = Column(Text)
+    file_path = Column(String, nullable=True)
+    violation_type = Column(String, nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    
+    user = relationship("User")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -19,11 +28,22 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True, nullable=False)
-    password_hash = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True)
+    phone = Column(String)
+    name = Column(String)
+    hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at = Column(DateTime, default=datetime.now)
+
+class SystemSetting(Base):
+    __tablename__ = "system_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String, unique=True, index=True)
+    value = Column(Text)
+    description = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     def verify_password(self, password: str) -> bool:
         return pwd_context.verify(password, self.password_hash)
