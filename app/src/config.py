@@ -13,7 +13,6 @@ class Settings(BaseSettings):
     DETECTION_THRESHOLD: float = 0.5
     SECRET_KEY: str = "zikeobom"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES=30
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     class Config:

@@ -1,16 +1,110 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 import psutil
 import GPUtil
 from datetime import datetime
 from typing import List, Dict, Any
 import logging
 import os
+import json
+from pydantic import BaseModel
+from ...models.settings import load_settings, save_settings
 
-router = APIRouter()
+router = APIRouter(prefix="/api/v1", tags=["system"])
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# 설정 파일 경로
+SETTINGS_FILE = "data/settings.json"
+
+# 설정 모델
+class SystemSettings(BaseModel):
+    sms_phone: str = ""
+    violation_threshold: int = 5
+    auto_logout_time: int = 30
+    notification_sound: bool = True
+    ai_sensitivity: str = "medium"
+    auto_ai_enable: bool = False
+    sms_notification: bool = False
+    email_notification: bool = False
+    person_detection: bool = True
+    helmet_detection: bool = True
+    ppe_detection: bool = False
+    danger_zone_detection: bool = False
+
+# 설정 파일이 저장될 디렉토리 생성
+os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
+
+def load_settings() -> SystemSettings:
+    """설정 파일을 로드합니다."""
+    try:
+        if os.path.exists(SETTINGS_FILE):
+            with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
+                return SystemSettings(**json.load(f))
+    except Exception as e:
+        logger.error(f"설정 로드 실패: {e}")
+    return SystemSettings()
+
+def save_settings(settings: Dict[str, Any]) -> bool:
+    """설정을 파일에 저장합니다."""
+    try:
+        # 기존 설정 로드
+        current_settings = load_settings().dict()
+        # 새로운 설정으로 업데이트
+        current_settings.update(settings)
+        
+        # 설정 저장
+        with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(current_settings, f, ensure_ascii=False, indent=2)
+        return True
+    except Exception as e:
+        logger.error(f"설정 저장 실패: {e}")
+        return False
+
+@router.get("/system/status")
+async def get_system_status():
+    """시스템 상태 정보를 반환합니다."""
+    try:
+        monitor = SystemMonitor()
+        
+        status = {
+            "success": True,
+            "cpu": monitor.get_cpu_info(),
+            "memory": monitor.get_memory_info(),
+            "disk": monitor.get_disk_info(),
+            "gpu": monitor.get_gpu_info(),
+            "logs": monitor.get_system_logs()
+        }
+        
+        return status
+    except Exception as e:
+        logger.error(f"시스템 상태 조회 실패: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@router.get("/system/settings")
+async def get_settings():
+    """시스템 설정을 반환합니다."""
+    try:
+        settings = load_settings()
+        return {"success": True, "settings": settings.dict()}
+    except Exception as e:
+        logger.error(f"설정 조회 실패: {e}")
+        return {"success": False, "error": str(e)}
+
+@router.post("/system/settings")
+async def update_settings(settings: Dict[str, Any]):
+    """시스템 설정을 업데이트합니다."""
+    try:
+        if save_settings(settings):
+            return {"success": True, "message": "설정이 저장되었습니다."}
+        return {"success": False, "error": "설정 저장에 실패했습니다."}
+    except Exception as e:
+        logger.error(f"설정 업데이트 실패: {e}")
+        return {"success": False, "error": str(e)}
 
 class SystemMonitor:
     @staticmethod
@@ -77,29 +171,6 @@ class SystemMonitor:
                 "message": "시스템이 정상 작동 중입니다."
             }
         ]
-
-@router.get("/status")
-async def get_system_status():
-    """시스템 상태 정보를 반환합니다."""
-    try:
-        monitor = SystemMonitor()
-        
-        status = {
-            "success": True,
-            "cpu": monitor.get_cpu_info(),
-            "memory": monitor.get_memory_info(),
-            "disk": monitor.get_disk_info(),
-            "gpu": monitor.get_gpu_info(),
-            "logs": monitor.get_system_logs()
-        }
-        
-        return status
-    except Exception as e:
-        logger.error(f"시스템 상태 조회 실패: {e}")
-        return {
-            "success": False,
-            "error": str(e)
-        }
 
 # 시스템 로그 저장을 위한 간단한 인메모리 큐
 system_logs = []

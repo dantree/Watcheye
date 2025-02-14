@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <title>지켜봄 - 로그인</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: 'Noto Sans KR', sans-serif;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                min-height: 100vh;
+                background-color: #1a1a1a;
+                color: #ffffff;
+            }
+
+            .login-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                background: #0A1628;
+            }
+            
+            .login-box {
+                background: rgba(17, 25, 40, 0.95);
+                padding: 2.5rem;
+                border-radius: 16px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+                width: 100%;
+                max-width: 420px;
+                backdrop-filter: blur(10px);
+            }
+            
+            .login-header {
+                text-align: center;
+                margin-bottom: 2.5rem;
+            }
+            
+            .login-header .logo {
+                width: 200px;
+                height: auto;
+                margin-bottom: 1rem;
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            
+            .login-header .sub-text {
+                color: #F3F4F6;
+                font-size: 1.25rem;
+                font-weight: 500;
+                margin-top: 0.5rem;
+            }
+            
+            .login-header h1 {
+                color: #F3F4F6;
+                font-size: 1.25rem;
+                font-weight: 500;
+                margin: 0;
+            }
+            
+            .login-form {
+                display: flex;
+                flex-direction: column;
+                gap: 1.25rem;
+            }
+            
+            .form-group {
+                position: relative;
+            }
+            
+            .form-group label {
+                display: block;
+                color: #9CA3AF;
+                margin-bottom: 0.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .form-group input {
+                width: 100%;
+                padding: 0.875rem 1rem 0.875rem 2.75rem;
+                border: 1px solid #2D3748;
+                border-radius: 8px;
+                background: #1A2433;
+                color: #F3F4F6;
+                font-size: 1rem;
+                transition: all 0.2s;
+            }
+            
+            .form-group input:focus {
+                outline: none;
+                border-color: #3B82F6;
+                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+            }
+            
+            .form-group .material-icons {
+                position: absolute;
+                left: 1rem;
+                top: 2.3rem;
+                color: #4B5563;
+                font-size: 1.25rem;
+            }
+            
+            .login-button {
+                background: #2563EB;
+                color: white;
+                padding: 0.875rem;
+                border: none;
+                border-radius: 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+                margin-top: 0.5rem;
+            }
+            
+            .login-button:hover {
+                background: #1D4ED8;
+                transform: translateY(-1px);
+            }
+            
+            .login-button:active {
+                transform: translateY(0);
+            }
+            
+            .login-footer {
+                margin-top: 1.5rem;
+                text-align: center;
+                color: #9CA3AF;
+                font-size: 0.9rem;
+            }
+            
+            .login-footer a {
+                color: #3B82F6;
+                text-decoration: none;
+                margin-left: 0.5rem;
+                font-weight: 500;
+                transition: color 0.2s;
+            }
+            
+            .login-footer a:hover {
+                color: #60A5FA;
+            }
+            
+            .error-message {
+                color: #EF4444;
+                font-size: 0.875rem;
+                margin-top: 0.5rem;
+                display: none;
+                padding: 0.75rem;
+                background: rgba(239, 68, 68, 0.1);
+                border-radius: 6px;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="login-container">
+            <div class="login-box">
+                <div class="login-header">
+                    <img src="/static/images/logo.png" alt="WATCHEYE" class="logo">
+                    <div class="sub-text">AI 안전감시 시스템</div>
+                </div>
+                <form class="login-form" id="loginForm">
+                    <div class="form-group">
+                        <label for="email">이메일</label>
+                        <i class="material-icons">email</i>
+                        <input type="email" id="email" name="email" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">비밀번호</label>
+                        <i class="material-icons">lock</i>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="error-message" id="errorMessage"></div>
+                    <button type="submit" class="login-button">로그인</button>
+                    <div class="login-footer">
+                        계정이 없으신가요?<a href="/register">회원가입</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script>
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const errorMessage = document.getElementById('errorMessage');
+                
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, password }),
+                        credentials: 'include'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        window.location.href = '/';
+                    } else {
+                        errorMessage.textContent = data.detail || '로그인에 실패했습니다.';
+                        errorMessage.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('로그인 오류:', error);
+                    errorMessage.textContent = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+                    errorMessage.style.display = 'block';
+                }
+            });
+        </script>
+    </body>
+</html> 

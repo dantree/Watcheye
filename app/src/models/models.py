@@ -5,6 +5,8 @@ from sqlalchemy.sql import func
 from .database import Base
 from passlib.context import CryptContext
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 class Event(Base):
     __tablename__ = "events"
 
@@ -22,8 +24,6 @@ class Event(Base):
     
     user = relationship("User")
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 class User(Base):
     __tablename__ = "users"
 
@@ -35,6 +35,13 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.now)
 
+    @staticmethod
+    def get_password_hash(password: str) -> str:
+        return pwd_context.hash(password)
+
+    def verify_password(self, plain_password: str) -> bool:
+        return pwd_context.verify(plain_password, self.hashed_password)
+
 class SystemSetting(Base):
     __tablename__ = "system_settings"
 
@@ -44,10 +51,3 @@ class SystemSetting(Base):
     description = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-
-    def verify_password(self, password: str) -> bool:
-        return pwd_context.verify(password, self.password_hash)
-
-    @staticmethod
-    def get_password_hash(password: str) -> str:
-        return pwd_context.hash(password)

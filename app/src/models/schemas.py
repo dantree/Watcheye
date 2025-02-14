@@ -34,7 +34,7 @@ class User(UserBase):
         from_attributes = True
 
 class UserLogin(BaseModel):
-    username: str
+    email: str
     password: str
 
 class UserResponse(UserBase):
@@ -47,11 +47,11 @@ class UserResponse(UserBase):
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str
-    username: str
+    email: str
 
 class RegisterResponse(BaseModel):
     message: str
-    username: str
+    email: str
 
 class TokenData(BaseModel):
     email: Optional[str] = None

@@ -1,12 +1,55 @@
 from fastapi import APIRouter, HTTPException, Response, Body
 from fastapi.responses import StreamingResponse
 import cv2
-from typing import Dict
+from typing import Dict, Any
 from ...services.camera_manager import CameraManager
 from loguru import logger
+import json
+import os
+from datetime import datetime
 
 router = APIRouter()
 camera_manager = CameraManager()
+
+# 설정 파일 경로
+CAMERA_SETTINGS_FILE = "data/camera_settings.json"
+
+# 설정 파일이 저장될 디렉토리 생성
+os.makedirs(os.path.dirname(CAMERA_SETTINGS_FILE), exist_ok=True)
+
+def load_camera_settings() -> dict:
+    """카메라 설정을 로드합니다."""
+    try:
+        if os.path.exists(CAMERA_SETTINGS_FILE):
+            with open(CAMERA_SETTINGS_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"카메라 설정 로드 실패: {e}")
+    return {
+        "camera1": {
+            "name": "카메라 1",
+            "url": "",
+            "resolution": "1280x720",
+            "fps": "30"
+        },
+        "camera2": {
+            "name": "카메라 2",
+            "url": "",
+            "resolution": "1280x720",
+            "fps": "30"
+        },
+        "common": {
+            "autoReconnect": True,
+            "reconnectInterval": 5,
+            "bufferSize": 5,
+            "qualityOptimization": True
+        },
+        "recording": {
+            "autoRecord": False,
+            "format": "mp4",
+            "retention": 30
+        }
+    }
 
 @router.post("/cameras/{camera_id}")
 async def add_camera(camera_id: int, url: str):
@@ -48,6 +91,24 @@ async def update_threshold(threshold: float):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.get("/cameras/settings")
+async def get_camera_settings():
+    """카메라 설정을 조회합니다."""
+    try:
+        settings = load_camera_settings()
+        return {"success": True, **settings}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/cameras/settings")
+async def update_camera_settings(settings: Dict[str, Any]):
+    """카메라 설정을 업데이트합니다."""
+    try:
+        with open(CAMERA_SETTINGS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(settings, f, ensure_ascii=False, indent=2)
+        return {"success": True, "message": "설정이 저장되었습니다."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/cameras/{camera_id}/stream")
 async def stream_camera(camera_id: int, ai: bool = False):
