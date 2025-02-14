@@ -53,13 +53,14 @@ async def update_threshold(threshold: float):
 async def stream_camera(camera_id: int, ai: bool = False):
     """
     카메라 스트리밍 엔드포인트
-      - 쿼리 파라미터 ai가 True이면 DetectionService를 적용하여 AI 감지가 된 프레임을 스트리밍
-      - ai가 False이면 원본 스트림을 그대로 스트리밍
+    - 쿼리 파라미터 ai가 True이면 DetectionService를 적용하여 AI 감지가 된 프레임을 스트리밍
+    - ai가 False이면 원본 스트림을 그대로 스트리밍
+    - AI 감지 시 감지된 객체를 자동으로 캡처
     """
     camera = camera_manager.get_camera(camera_id)
     if not camera:
         raise HTTPException(status_code=404, detail="Camera not found")
-    
+
     def generate_frames():
         while True:
             try:
@@ -68,22 +69,31 @@ async def stream_camera(camera_id: int, ai: bool = False):
                     continue
 
                 # ai 파라미터가 True이면 detection_service를 적용
-                if ai:
-                    if camera.detection_service:
-                        try:
-                            # process_frame은 프레임에 바운딩 박스를 그린 후, (프레임, 감지된 사람 수, helmet 수)를 반환
-                            frame, num_persons, num_helmets = camera.detection_service.process_frame(frame)
-                        except Exception as e:
-                            logger.error(f"Error processing frame with AI: {str(e)}")
-                            continue
+                if ai and camera.detection_service:
+                    try:
+                        # Store original frame for capture
+                        original_frame = frame.copy()
+                        
+                        # Process frame for detection and drawing
+                        frame, num_persons, num_helmets = camera.detection_service.process_frame(frame)
+                        
+                        # Enable detection service if not already enabled
+                        if not camera.detection_service.active:
+                            camera.detection_service.enable_detection()
+                            
+                    except Exception as e:
+                        logger.error(f"Error processing frame with AI: {str(e)}")
+                        continue
 
+                # Encode frame for streaming
                 ret, buffer = cv2.imencode('.jpg', frame)
                 if not ret:
                     continue
+                    
                 frame_bytes = buffer.tobytes()
-                
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+                       
             except Exception as e:
                 logger.error(f"Error in stream generation: {str(e)}")
                 continue
