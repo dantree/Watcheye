@@ -1139,45 +1139,39 @@ async def view_page(request: Request, db: Session = Depends(get_db)):
                             // 현재 버튼에 active 클래스가 있는지 확인하여, 새 상태 결정
                             const desiredEnabled = !aiButton.classList.contains('active');
                             console.log(`AI 감지를 ${desiredEnabled ? "활성화" : "비활성화"} 하도록 설정합니다.`);
-                            
-                            // 백엔드의 /api/v1/cameras/{cameraId}/ai 엔드포인트에 POST 요청 (JSON 본문: { enabled: true/false })
-                            const response = await fetch(`/api/v1/cameras/${cameraId}/ai`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({ enabled: desiredEnabled })
-                            });
 
-                            if (response.ok) {
-                                const data = await response.json();
-                                console.log("서버 응답:", data);
-                                if (data.success) {
-                                    // data.ai_enabled는 CameraManager에서 관리하는 AI 상태입니다.
-                                    if (data.ai_enabled) {
-                                        aiButton.classList.add('active');
-                                        aiIcon.style.color = '#1a73e8';  // 활성화 시 파란색
-                                        showAlert('AI 감지가 활성화되었습니다.', 'success');
-                                        // 스트림 이미지 URL 업데이트: AI 적용된 스트림 요청 (예: ?ai=true)
-                                        const streamImg = cameraCell.querySelector('img');
-                                        if (streamImg) {
-                                            streamImg.src = `/api/v1/cameras/${cameraId}/stream?ai=true&t=${Date.now()}`;
-                                        }
-                                    } else {
-                                        aiButton.classList.remove('active');
-                                        aiIcon.style.color = '#5f6368';  // 비활성화 시 회색
-                                        showAlert('AI 감지가 비활성화되었습니다.', 'info');
-                                        // 기본 스트림 URL로 업데이트
-                                        const streamImg = cameraCell.querySelector('img');
-                                        if (streamImg) {
-                                            streamImg.src = `/api/v1/cameras/${cameraId}/stream?t=${Date.now()}`;
-                                        }
-                                    }
-                                } else {
-                                    throw new Error('서버가 성공을 반환하지 않았습니다.');
-                                }
+                            // UI 업데이트 및 알림 표시
+                            if (desiredEnabled) {
+                                aiButton.classList.add('active');
+                                aiIcon.style.color = '#1a73e8';  // 활성화 시 파란색
+                                showAlert('AI 감지가 활성화되었습니다.', 'success');
                             } else {
-                                throw new Error(`AI 제어 실패 (상태 코드: ${response.status})`);
+                                aiButton.classList.remove('active');
+                                aiIcon.style.color = '#5f6368';  // 비활성화 시 회색
+                                showAlert('AI 감지가 비활성화되었습니다.', 'info');
+                            }
+                            
+                            // 스트림 이미지를 찾고 업데이트
+                            const streamImg = cameraCell.querySelector('img');
+                            if (streamImg) {
+                                // 기존 이미지 제거
+                                const parentElement = streamImg.parentElement;
+                                streamImg.remove();
+
+                                // 새 이미지 엘리먼트 생성
+                                const newStreamImg = document.createElement('img');
+                                newStreamImg.onerror = () => {
+                                    console.error('스트림 연결 실패');
+                                    showAlert('스트림 연결에 실패했습니다.', 'error');
+                                };
+
+                                // 새로운 스트림 URL로 설정
+                                newStreamImg.src = `/api/v1/cameras/${cameraId}/stream?ai=${desiredEnabled}&t=${Date.now()}`;
+                                
+                                // 새 이미지 추가
+                                parentElement.appendChild(newStreamImg);
+                            } else {
+                                throw new Error('스트림 이미지 요소를 찾을 수 없습니다.');
                             }
                         } catch (error) {
                             console.error("toggleAI 함수에서 에러 발생:", error);
