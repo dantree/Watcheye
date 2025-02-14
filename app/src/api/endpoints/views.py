@@ -1594,71 +1594,102 @@ async def register_page():
                     display: none;
                 }
             </style>
-        </head>
-        <body>
-            <div class="register-container">
-                <div class="logo">
-                    <i class="material-icons">visibility</i>
-                    <span>지켜봄</span>
-                </div>
-                <div id="error-message" class="error-message"></div>
-                <form id="registerForm">
-                    <div class="form-group">
-                        <label for="username">사용자명</label>
-                        <input type="text" id="username" name="username" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">비밀번호</label>
-                        <input type="password" id="password" name="password" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password2">비밀번호 확인</label>
-                        <input type="password" id="password2" name="password2" required>
-                    </div>
-                    <button type="submit" class="submit-btn">회원가입</button>
-                </form>
-                <div class="login-link">
-                    이미 계정이 있으신가요? <a href="/login">로그인</a>
-                </div>
+            </head>
+            <body>
+                <div class="register-container">
+            <div class="logo">
+                <i class="material-icons">visibility</i>
+                <span>지켜봄</span>
             </div>
-            
-            <script>
-                document.getElementById('registerForm').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    const password = document.getElementById('password').value;
-                    const password2 = document.getElementById('password2').value;
-                    
-                    if (password !== password2) {
-                        const errorMessage = document.getElementById('error-message');
-                        errorMessage.textContent = '비밀번호가 일치하지 않습니다.';
-                        errorMessage.style.display = 'block';
-                        return;
-                    }
-                    
-                    const response = await fetch('/api/auth/register', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            username: document.getElementById('username').value,
-                            password: password
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (response.ok) {
-                        alert('회원가입이 완료되었습니다.');
-                        window.location.href = '/login';
-                    } else {
-                        const errorMessage = document.getElementById('error-message');
-                        errorMessage.textContent = data.detail || '회원가입에 실패했습니다.';
-                        errorMessage.style.display = 'block';
-                    }
+            <div id="error-message" class="error-message"></div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="username">사용자명</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">이메일</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="mobile_phone">휴대폰 번호</label>
+                    <input type="tel" id="mobile_phone" name="mobile_phone" 
+                        pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}" 
+                        placeholder="010-0000-0000">
+                </div>
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="password2">비밀번호 확인</label>
+                    <input type="password" id="password2" name="password2" required>
+                </div>
+                <button type="submit" class="submit-btn">회원가입</button>
+            </form>
+            <div class="login-link">
+                이미 계정이 있으신가요? <a href="/login">로그인</a>
+            </div>
+        </div>
+                
+                <script>
+            document.getElementById('registerForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const password = document.getElementById('password').value;
+                const password2 = document.getElementById('password2').value;
+                const email = document.getElementById('email').value;
+                const mobile_phone = document.getElementById('mobile_phone').value;
+                
+                if (password !== password2) {
+                    const errorMessage = document.getElementById('error-message');
+                    errorMessage.textContent = '비밀번호가 일치하지 않습니다.';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+
+                // Basic email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    const errorMessage = document.getElementById('error-message');
+                    errorMessage.textContent = '유효한 이메일 주소를 입력해주세요.';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+                
+                // Optional phone number validation
+                if (mobile_phone && !/^010-\d{4}-\d{4}$/.test(mobile_phone)) {
+                    const errorMessage = document.getElementById('error-message');
+                    errorMessage.textContent = '휴대폰 번호를 010-0000-0000 형식으로 입력해주세요.';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+                
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: document.getElementById('username').value,
+                        email: email,
+                        mobile_phone: mobile_phone || null,  // Send null if no phone number provided
+                        password: password
+                    })
                 });
-            </script>
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('회원가입이 완료되었습니다.');
+                    window.location.href = '/login';
+                } else {
+                    const errorMessage = document.getElementById('error-message');
+                    errorMessage.textContent = data.detail || '회원가입에 실패했습니다.';
+                    errorMessage.style.display = 'block';
+                }
+            });
+        </script>
         </body>
     </html>
     """

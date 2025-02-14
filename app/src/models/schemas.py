@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel,EmailStr
 from datetime import datetime
 from typing import Optional
 
@@ -21,7 +21,13 @@ class UserBase(BaseModel):
     username: str
 
 class UserCreate(UserBase):
+    username: str
+    email: EmailStr  # Using EmailStr for email validation
+    mobile_phone: Optional[str] = None
     password: str
+
+    class Config:
+        from_attributes = True
 
 class UserLogin(BaseModel):
     username: str
@@ -42,6 +48,10 @@ class LoginResponse(BaseModel):
 class RegisterResponse(BaseModel):
     message: str
     username: str
+    email: str
+
+    class Config:
+        from_attributes = True
 
 class TokenData(BaseModel):
     username: Optional[str] = None

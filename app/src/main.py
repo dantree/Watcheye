@@ -15,8 +15,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# 데이터베이스 초기화 (테이블 삭제 후 재생성)
 
-# 데이터베이스 테이블 생성
+# def init_db():
+#     logger.info("Dropping all tables...")
+#     Base.metadata.drop_all(bind=engine)
+#     logger.info("Creating all tables...")
+#     Base.metadata.create_all(bind=engine)
+#     logger.info("Database reset complete")
+
+# init_db()
+
 Base.metadata.create_all(bind=engine)
 
 # 라우터 등록
